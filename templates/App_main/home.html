@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% block title %}
+{% endblock %}
+{% load static %}
+{% load crispy_forms_filters %}
+{% block main %}
+    <style>
+        .my_card {
+            box-shadow: 0 0 10px #474444;
+            -webkit-box-shadow: 0 0 10px #474444;
+        }
+    </style>
+    <div class="ml-3 mt-5">
+        <div class="row">
+            <div class="col-lg-8 col-md-8 col-sm-12">
+                {% for story in stories %}
+                    <div class="container ml-3 my_card" style="padding: 20px 25px">
+                        <div class="row">
+                            <div class="col-lg-7 col-md-7" style="text-align: center">
+                                <h2 class="mt-2 mb-2">{{ story.user.first_name }} {{ story.user.last_name }}</h2>
+                                <small>{{ story.post_date }}</small>
+                                <hr>
+                                <p class="mb-4">{{ story.story|truncatechars:100 }}</p>
+                            </div>
+                            <div class="col-lg-5 col-md-5 mt-3">
+                                <img src="{{ story.picture.url }}" style="height: 254px; width: 300px" alt="Image">
+                            </div>
+                        </div>
+                        <hr>
+                        <div>
+                            <div class="row">
+                                <div class="col-lg-2">
+                                    <form method="post" class="form-group">
+                                        {% csrf_token %}
+                                        <input name="like" value="{{ story.id }}" style="display: none">
+                                        <button name="like_btn" type="submit"
+                                                style="border: none; background-color:#fff;">
+                                            {% if story.pk in likes %}
+                                                <i class="fa fa-heart" style="color: red;font-size: 28px"></i>
+                                            {% else %}
+                                                <i class="fa fa-heart" style="color: black;font-size: 28px"></i>
+                                            {% endif %}
+                                        </button>
+                                    </form>
+                                </div>
+                                <div class="col-lg-10">
+                                    <div class="row">
+                                        <div class="col-lg-2 col-md-2 col-sm-12">
+                                            <i style="font-size: 28px" class="fa fa-comments" aria-hidden="true">
+                                                {% if story.pk in comment_list %}
+                                                    <span>{{ story.story_commented.count }}</span>
+                                                {% endif %}
+                                            </i>
+                                        </div>
+                                        <div class="col-lg-10 col-md-10 col-sm-12">
+                                            <form method="post" class="form-group">
+                                                {% csrf_token %}
+                                                <div class="row">
+                                                    <div class="col-lg-8">
+                                                        <input name="comment_story" value="{{ story.id }}"
+                                                               style="display: none">
+                                                        <input name="comment" type="text" style="width: 100%">
+                                                    </div>
+                                                    <div class="col-lg-4">
+                                                        <button name="comment_btn" type="submit"
+                                                                style="border: none; color: black; font-size: 20px">
+                                                            <b>Comment</b>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                {% endfor %}
+
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-12">
+                <div class="centered" style="height: 30px; background-color:#c6c2c2; margin-left: 1px;">
+                    <h4 style="text-align: center">Messages</h4>
+                </div>
+                <div class="row ml-2">
+                    <form method="post" class="form-group">
+                        {% csrf_token %}
+                        <fieldset class="form-group">
+                            <label for="rec-id">To: </label>
+                            <input id="rec-id" type="text" name="receiver" style="height: 20px; width: 100%">
+                            <label for="msg-id">Message: </label>
+                            <input id="msg-id" type="text" name="message" style="height: 50px; width: 100%">
+                        </fieldset>
+                        <div>
+                            <button style="border: none; color: black; font-size: 20px; box-shadow: 0 0 5px black; -webkit-box-shadow: 0 0 5px black"
+                                    type="submit" name="msg_btn">Send
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <br>
+                <hr>
+
+                {% for message in messages %}
+                    <div class="row">
+                        {% ifequal message.sender request.user %}
+                            <div class="col-lg-4">{{ message.receiver }}</div>
+                            </div>
+                            <div class="col-lg-8"><p><b>{{ message.message }}</b></p>
+                                <small>{{ message.time.date }} {{ message.time.time }}</small></div>
+                            <hr>
+                        {% else %}
+                            {% ifequal message.receiver request.user %}
+                                <div class="col-lg-4">{{ message.sender }}</div>
+                                </div>
+                                <div class="col-lg-8">{{ message.message }}
+                                <small>{{ message.time.date }} {{ message.time.time }}</small></div>
+                                <hr>
+                            {% endifequal %}
+                    {% endifequal %}
+                    </div>
+                {% endfor %}
+    </div>
+
+{% endblock %}
